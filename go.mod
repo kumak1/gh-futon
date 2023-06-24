@@ -1,4 +1,4 @@
-module git.pepabo.com/kumak1/gh-futon
+module github.com/kumak1/gh-futon
 
 go 1.20
 
