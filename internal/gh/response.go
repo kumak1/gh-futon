@@ -1,10 +1,10 @@
 package gh
 
-type LoginResponse struct {
+type UserResponse struct {
 	Login string
 }
 
-type EventResponse struct {
+type UserEventResponse struct {
 	Id   string
 	Type string
 	Repo struct {
