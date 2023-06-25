@@ -1,6 +1,10 @@
 package gh
 
-type Event struct {
+type LoginResponse struct {
+	Login string
+}
+
+type EventResponse struct {
 	Id   string
 	Type string
 	Repo struct {
@@ -25,5 +29,3 @@ type Event struct {
 		}
 	}
 }
-
-type Events []*Event
