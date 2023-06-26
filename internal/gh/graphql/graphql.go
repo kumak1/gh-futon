@@ -25,6 +25,11 @@ type (
 		Author struct {
 			Login graphql.String
 		}
+		Labels struct {
+			Nodes []struct {
+				Name graphql.String
+			}
+		} `graphql:"labels(first: 20)"`
 	}
 
 	pageInfo struct {
