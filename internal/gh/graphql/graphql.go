@@ -30,6 +30,10 @@ type (
 				Name graphql.String
 			}
 		} `graphql:"labels(first: 20)"`
+		Repository struct {
+			Name          graphql.String
+			NameWithOwner graphql.String
+		}
 	}
 
 	pageInfo struct {
