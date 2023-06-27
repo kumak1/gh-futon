@@ -3,7 +3,7 @@ package graphql
 import graphql "github.com/cli/shurcooL-graphql"
 
 type (
-	IssueNextQuery struct {
+	issueNextQuery struct {
 		User struct {
 			ContributionsCollection struct {
 				IssueContributions issueContributions `graphql:"issueContributions(first: $first, after: $after)"`
@@ -12,27 +12,27 @@ type (
 	}
 )
 
-func (p IssueNextQuery) execQuery(variables map[string]interface{}) paginateQuery {
-	query := IssueNextQuery{}
-	if err := graphClient.Query("IssueNextQuery", &query, variables); err != nil {
+func (p issueNextQuery) execQuery(variables map[string]interface{}) paginateQuery {
+	query := issueNextQuery{}
+	if err := graphClient.Query("issueNext", &query, variables); err != nil {
 		panic(err)
 	}
 	return query
 }
 
-func (p IssueNextQuery) nextQuery() interface{} {
-	return IssueNextQuery{}
+func (p issueNextQuery) nextQuery() interface{} {
+	return issueNextQuery{}
 }
 
-func (p IssueNextQuery) hasNextPage() graphql.Boolean {
+func (p issueNextQuery) hasNextPage() graphql.Boolean {
 	return p.User.ContributionsCollection.IssueContributions.PageInfo.HasNextPage
 }
 
-func (p IssueNextQuery) endCursor() graphql.String {
+func (p issueNextQuery) endCursor() graphql.String {
 	return p.User.ContributionsCollection.IssueContributions.PageInfo.EndCursor
 }
 
-func (p IssueNextQuery) nodes() []NodeInfo {
+func (p issueNextQuery) nodes() []NodeInfo {
 	var nodes []NodeInfo
 	for _, n := range p.User.ContributionsCollection.IssueContributions.Nodes {
 		nodes = append(nodes, n.Issue)

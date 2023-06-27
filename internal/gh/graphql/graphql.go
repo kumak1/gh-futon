@@ -64,15 +64,15 @@ type (
 )
 
 func GetIssue(username string, from time.Time, to time.Time) []NodeInfo {
-	return getContributions(IssueQuery{}, getVariables(username, from, to))
+	return getContributions(issueQuery{}, getVariables(username, from, to))
 }
 
 func GetPullRequest(username string, from time.Time, to time.Time) []NodeInfo {
-	return getContributions(PullRequestQuery{}, getVariables(username, from, to))
+	return getContributions(pullRequestQuery{}, getVariables(username, from, to))
 }
 
 func GetPullRequestReview(username string, from time.Time, to time.Time) []NodeInfo {
-	return getContributions(PullRequestReviewQuery{}, getVariables(username, from, to))
+	return getContributions(pullRequestReviewQuery{}, getVariables(username, from, to))
 }
 
 func getVariables(username string, from time.Time, to time.Time) map[string]interface{} {
@@ -89,18 +89,18 @@ func getContributions(q interface{}, variables map[string]interface{}) []NodeInf
 	var paginate paginateQuery
 
 	switch q.(type) {
-	case IssueQuery:
-		paginate = IssueQuery{}.execQuery(variables)
-	case IssueNextQuery:
-		paginate = IssueNextQuery{}.execQuery(variables)
-	case PullRequestQuery:
-		paginate = PullRequestQuery{}.execQuery(variables)
-	case PullRequestNextQuery:
-		paginate = PullRequestNextQuery{}.execQuery(variables)
-	case PullRequestReviewQuery:
-		paginate = PullRequestReviewQuery{}.execQuery(variables)
-	case PullRequestReviewNextQuery:
-		paginate = PullRequestReviewNextQuery{}.execQuery(variables)
+	case issueQuery:
+		paginate = issueQuery{}.execQuery(variables)
+	case issueNextQuery:
+		paginate = issueNextQuery{}.execQuery(variables)
+	case pullRequestQuery:
+		paginate = pullRequestQuery{}.execQuery(variables)
+	case pullRequestNextQuery:
+		paginate = pullRequestNextQuery{}.execQuery(variables)
+	case pullRequestReviewQuery:
+		paginate = pullRequestReviewQuery{}.execQuery(variables)
+	case pullRequestReviewNextQuery:
+		paginate = pullRequestReviewNextQuery{}.execQuery(variables)
 	}
 
 	if paginate.hasNextPage() {

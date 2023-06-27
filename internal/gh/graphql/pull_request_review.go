@@ -3,7 +3,7 @@ package graphql
 import graphql "github.com/cli/shurcooL-graphql"
 
 type (
-	PullRequestReviewQuery struct {
+	pullRequestReviewQuery struct {
 		User struct {
 			ContributionsCollection struct {
 				PullRequestReviewContributions pullRequestContributions `graphql:"pullRequestReviewContributions(first: $first)"`
@@ -12,27 +12,27 @@ type (
 	}
 )
 
-func (p PullRequestReviewQuery) execQuery(variables map[string]interface{}) paginateQuery {
-	query := PullRequestReviewQuery{}
-	if err := graphClient.Query("PullRequestReviewQuery", &query, variables); err != nil {
+func (p pullRequestReviewQuery) execQuery(variables map[string]interface{}) paginateQuery {
+	query := pullRequestReviewQuery{}
+	if err := graphClient.Query("pullRequestReview", &query, variables); err != nil {
 		panic(err)
 	}
 	return query
 }
 
-func (p PullRequestReviewQuery) nextQuery() interface{} {
-	return PullRequestReviewNextQuery{}
+func (p pullRequestReviewQuery) nextQuery() interface{} {
+	return pullRequestReviewNextQuery{}
 }
 
-func (p PullRequestReviewQuery) hasNextPage() graphql.Boolean {
+func (p pullRequestReviewQuery) hasNextPage() graphql.Boolean {
 	return p.User.ContributionsCollection.PullRequestReviewContributions.PageInfo.HasNextPage
 }
 
-func (p PullRequestReviewQuery) endCursor() graphql.String {
+func (p pullRequestReviewQuery) endCursor() graphql.String {
 	return p.User.ContributionsCollection.PullRequestReviewContributions.PageInfo.EndCursor
 }
 
-func (p PullRequestReviewQuery) nodes() []NodeInfo {
+func (p pullRequestReviewQuery) nodes() []NodeInfo {
 	var nodes []NodeInfo
 	for _, n := range p.User.ContributionsCollection.PullRequestReviewContributions.Nodes {
 		nodes = append(nodes, n.PullRequest)
