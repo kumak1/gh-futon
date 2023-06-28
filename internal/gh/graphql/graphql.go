@@ -88,17 +88,17 @@ func getVariables(username string, from time.Time, to time.Time) map[string]inte
 func execQuery(q interface{}, variables map[string]interface{}) (paginateQuery, error) {
 	switch q.(type) {
 	case issueQuery:
-		return issueQuery{}.execQuery(variables)
+		return q.(issueQuery).execQuery(variables)
 	case issueNextQuery:
-		return issueNextQuery{}.execQuery(variables)
+		return q.(issueNextQuery).execQuery(variables)
 	case pullRequestQuery:
-		return pullRequestQuery{}.execQuery(variables)
+		return q.(pullRequestQuery).execQuery(variables)
 	case pullRequestNextQuery:
-		return pullRequestNextQuery{}.execQuery(variables)
+		return q.(pullRequestNextQuery).execQuery(variables)
 	case pullRequestReviewQuery:
-		return pullRequestReviewQuery{}.execQuery(variables)
+		return q.(pullRequestReviewQuery).execQuery(variables)
 	case pullRequestReviewNextQuery:
-		return pullRequestReviewNextQuery{}.execQuery(variables)
+		return q.(pullRequestReviewNextQuery).execQuery(variables)
 	}
 
 	return nil, fmt.Errorf("invalid query")
