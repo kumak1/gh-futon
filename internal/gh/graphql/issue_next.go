@@ -12,8 +12,8 @@ type (
 	}
 )
 
-func (p issueNextQuery) execQuery(variables map[string]interface{}) (paginateQuery, error) {
-	err := graphClient.Query("issueNext", &p, variables)
+func (p issueNextQuery) execQuery(variable QueryVariable) (paginateQuery, error) {
+	err := graphClient.Query("issueNext", &p, variable.ToMap())
 	return p, err
 }
 

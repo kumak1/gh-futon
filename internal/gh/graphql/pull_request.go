@@ -12,8 +12,8 @@ type (
 	}
 )
 
-func (p pullRequestQuery) execQuery(variables map[string]interface{}) (paginateQuery, error) {
-	err := graphClient.Query("pullRequest", &p, variables)
+func (p pullRequestQuery) execQuery(variable QueryVariable) (paginateQuery, error) {
+	err := graphClient.Query("pullRequest", &p, variable.ToMap())
 	return p, err
 }
 

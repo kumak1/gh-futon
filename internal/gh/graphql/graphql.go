@@ -21,9 +21,11 @@ type (
 	DateTime struct{ time.Time }
 
 	NodeInfo struct {
-		Title  graphql.String
-		Url    graphql.String
-		Author struct {
+		Title     graphql.String
+		Url       graphql.String
+		CreatedAt DateTime
+		ClosedAt  DateTime
+		Author    struct {
 			Login graphql.String
 		}
 		Labels struct {
@@ -49,6 +51,14 @@ type (
 		}
 	}
 
+	issueComments struct {
+		PageInfo pageInfo
+		Nodes    []struct {
+			CreatedAt DateTime
+			Issue     NodeInfo
+		}
+	}
+
 	pullRequestContributions struct {
 		PageInfo pageInfo
 		Nodes    []struct {
@@ -62,59 +72,89 @@ type (
 		endCursor() graphql.String
 		nodes() []NodeInfo
 	}
+
+	QueryVariable struct {
+		Username string
+		From     *time.Time
+		To       *time.Time
+		After    graphql.String
+	}
 )
 
-func GetIssue(username string, from time.Time, to time.Time) []NodeInfo {
-	return getContributions(issueQuery{}, getVariables(username, from, to))
-}
-
-func GetPullRequest(username string, from time.Time, to time.Time) []NodeInfo {
-	return getContributions(pullRequestQuery{}, getVariables(username, from, to))
-}
-
-func GetPullRequestReview(username string, from time.Time, to time.Time) []NodeInfo {
-	return getContributions(pullRequestReviewQuery{}, getVariables(username, from, to))
-}
-
-func getVariables(username string, from time.Time, to time.Time) map[string]interface{} {
-	return map[string]interface{}{
-		"username": graphql.String(username),
-		"first":    graphql.Int(10),
-		"from":     DateTime{from},
-		"to":       DateTime{to},
+func (q QueryVariable) ToMap() map[string]interface{} {
+	result := map[string]interface{}{
+		"username": graphql.String(q.Username),
+		"first":    graphql.Int(100),
 	}
+	if q.From != nil {
+		result["from"] = DateTime{*q.From}
+	}
+	if q.From != nil {
+		result["to"] = DateTime{*q.To}
+	}
+	if q.After != "" {
+		result["after"] = q.After
+	}
+	return result
 }
 
-func execQuery(q interface{}, variables map[string]interface{}) (paginateQuery, error) {
+func (q QueryVariable) ToMapForComment() map[string]interface{} {
+	result := q.ToMap()
+	delete(result, "from")
+	delete(result, "to")
+	return result
+}
+
+func GetIssue(variable QueryVariable) []NodeInfo {
+	return getContributions(issueQuery{}, variable)
+}
+
+func GetIssueComment(variable QueryVariable) []NodeInfo {
+	return getContributions(issueCommentQuery{}, variable)
+}
+
+func GetPullRequest(variable QueryVariable) []NodeInfo {
+	return getContributions(pullRequestQuery{}, variable)
+}
+
+func GetPullRequestReview(variable QueryVariable) []NodeInfo {
+	return getContributions(pullRequestReviewQuery{}, variable)
+}
+
+func execQuery(q interface{}, variable QueryVariable) (paginateQuery, error) {
 	switch q.(type) {
 	case issueQuery:
-		return q.(issueQuery).execQuery(variables)
+		return q.(issueQuery).execQuery(variable)
 	case issueNextQuery:
-		return q.(issueNextQuery).execQuery(variables)
+		return q.(issueNextQuery).execQuery(variable)
+	case issueCommentQuery:
+		return q.(issueCommentQuery).execQuery(variable)
+	case issueCommentNextQuery:
+		return q.(issueCommentNextQuery).execQuery(variable)
 	case pullRequestQuery:
-		return q.(pullRequestQuery).execQuery(variables)
+		return q.(pullRequestQuery).execQuery(variable)
 	case pullRequestNextQuery:
-		return q.(pullRequestNextQuery).execQuery(variables)
+		return q.(pullRequestNextQuery).execQuery(variable)
 	case pullRequestReviewQuery:
-		return q.(pullRequestReviewQuery).execQuery(variables)
+		return q.(pullRequestReviewQuery).execQuery(variable)
 	case pullRequestReviewNextQuery:
-		return q.(pullRequestReviewNextQuery).execQuery(variables)
+		return q.(pullRequestReviewNextQuery).execQuery(variable)
 	}
 
 	return nil, fmt.Errorf("invalid query")
 }
 
-func getContributions(q interface{}, variables map[string]interface{}) []NodeInfo {
+func getContributions(q interface{}, variable QueryVariable) []NodeInfo {
 	var contributes []NodeInfo
 
-	paginate, err := execQuery(q, variables)
+	paginate, err := execQuery(q, variable)
 	if err != nil {
 		panic(err)
 	}
 
 	if paginate.hasNextPage() {
-		variables["after"] = paginate.endCursor()
-		contributes = append(getContributions(paginate.nextQuery(), variables), contributes...)
+		variable.After = paginate.endCursor()
+		contributes = append(getContributions(paginate.nextQuery(), variable), contributes...)
 	}
 
 	contributes = append(paginate.nodes(), contributes...)
