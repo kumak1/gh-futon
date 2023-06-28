@@ -13,9 +13,8 @@ type (
 )
 
 func (p pullRequestReviewQuery) execQuery(variables map[string]interface{}) (paginateQuery, error) {
-	query := pullRequestReviewQuery{}
-	err := graphClient.Query("pullRequestReview", &query, variables)
-	return query, err
+	err := graphClient.Query("pullRequestReview", &p, variables)
+	return p, err
 }
 
 func (p pullRequestReviewQuery) nextQuery() interface{} {
