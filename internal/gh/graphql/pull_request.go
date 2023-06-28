@@ -12,12 +12,10 @@ type (
 	}
 )
 
-func (p pullRequestQuery) execQuery(variables map[string]interface{}) paginateQuery {
+func (p pullRequestQuery) execQuery(variables map[string]interface{}) (paginateQuery, error) {
 	query := pullRequestQuery{}
-	if err := graphClient.Query("pullRequest", &query, variables); err != nil {
-		panic(err)
-	}
-	return query
+	err := graphClient.Query("pullRequest", &query, variables)
+	return query, err
 }
 
 func (p pullRequestQuery) nextQuery() interface{} {

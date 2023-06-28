@@ -1,6 +1,7 @@
 package graphql
 
 import (
+	"fmt"
 	"github.com/cli/go-gh/v2/pkg/api"
 	graphql "github.com/cli/shurcooL-graphql"
 	"time"
@@ -84,23 +85,31 @@ func getVariables(username string, from time.Time, to time.Time) map[string]inte
 	}
 }
 
-func getContributions(q interface{}, variables map[string]interface{}) []NodeInfo {
-	var contributes []NodeInfo
-	var paginate paginateQuery
-
+func execQuery(q interface{}, variables map[string]interface{}) (paginateQuery, error) {
 	switch q.(type) {
 	case issueQuery:
-		paginate = issueQuery{}.execQuery(variables)
+		return issueQuery{}.execQuery(variables)
 	case issueNextQuery:
-		paginate = issueNextQuery{}.execQuery(variables)
+		return issueNextQuery{}.execQuery(variables)
 	case pullRequestQuery:
-		paginate = pullRequestQuery{}.execQuery(variables)
+		return pullRequestQuery{}.execQuery(variables)
 	case pullRequestNextQuery:
-		paginate = pullRequestNextQuery{}.execQuery(variables)
+		return pullRequestNextQuery{}.execQuery(variables)
 	case pullRequestReviewQuery:
-		paginate = pullRequestReviewQuery{}.execQuery(variables)
+		return pullRequestReviewQuery{}.execQuery(variables)
 	case pullRequestReviewNextQuery:
-		paginate = pullRequestReviewNextQuery{}.execQuery(variables)
+		return pullRequestReviewNextQuery{}.execQuery(variables)
+	}
+
+	return nil, fmt.Errorf("invalid query")
+}
+
+func getContributions(q interface{}, variables map[string]interface{}) []NodeInfo {
+	var contributes []NodeInfo
+
+	paginate, err := execQuery(q, variables)
+	if err != nil {
+		panic(err)
 	}
 
 	if paginate.hasNextPage() {
