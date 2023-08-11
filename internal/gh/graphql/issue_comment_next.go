@@ -25,7 +25,7 @@ func (p issueCommentNextQuery) hasNextPage() graphql.Boolean {
 		return false
 	}
 
-	createdAt := p.User.IssueComments.Nodes[0].CreatedAt
+	createdAt := p.User.IssueComments.Nodes[0].Issue.CreatedAt
 	return graphql.Boolean(createdAt.After(*issueCommentVariable.From) && createdAt.Before(*issueCommentVariable.To))
 }
 
