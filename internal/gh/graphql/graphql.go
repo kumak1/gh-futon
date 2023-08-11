@@ -81,6 +81,10 @@ type (
 	}
 )
 
+func (r NodeInfo) ToMarkdownList() string {
+	return fmt.Sprintf("- [%s](%s)", r.Title, r.Url)
+}
+
 func (q QueryVariable) ToMap() map[string]interface{} {
 	result := map[string]interface{}{
 		"username": graphql.String(q.Username),
