@@ -22,21 +22,20 @@ func init() {
 	username := gh.GetLoginUser()
 	pflag.StringVarP(&User, "user", "u", username.Login, "specify github username")
 
-	defaultTo := time.Now()
-	to := pflag.String("to", defaultTo.Format(time.DateOnly), "")
+	to := pflag.String("to", time.Now().Format(time.DateOnly), "")
+	from := pflag.String("from", time.Now().AddDate(0, -6, 0).Format(time.DateOnly), "")
+
+	pflag.Parse()
+
 	To, err = time.Parse(time.DateOnly, *to)
 	if err != nil {
 		panic(err)
 	}
 
-	defaultFrom := defaultTo.AddDate(0, -6, 0)
-	from := pflag.String("from", defaultFrom.Format(time.DateOnly), "")
 	From, err = time.Parse(time.DateOnly, *from)
 	if err != nil {
 		panic(err)
 	}
-
-	pflag.Parse()
 
 	if *help {
 		pflag.PrintDefaults()
