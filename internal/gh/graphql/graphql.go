@@ -164,3 +164,13 @@ func getContributions(q interface{}, variable QueryVariable) []NodeInfo {
 	contributes = append(paginate.nodes(), contributes...)
 	return contributes
 }
+
+func ExcludeAuthor(nodeInfos []NodeInfo, author string) []NodeInfo {
+	var filteredNodeInfo []NodeInfo
+	for _, c := range nodeInfos {
+		if string(c.Author.Login) != author {
+			filteredNodeInfo = append(filteredNodeInfo, c)
+		}
+	}
+	return filteredNodeInfo
+}
