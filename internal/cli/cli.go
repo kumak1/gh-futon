@@ -12,12 +12,29 @@ var (
 	User string
 	From time.Time
 	To   time.Time
+	Item OutputItem
 )
+
+type OutputItem struct {
+	Issue             bool
+	IssueComment      bool
+	PullRequest       bool
+	PullRequestReview bool
+}
+
+func (o OutputItem) Any() bool {
+	return !o.Issue && !o.IssueComment && !o.PullRequest && !o.PullRequestReview
+}
 
 func init() {
 	var err error
 
 	help := pflag.BoolP("help", "h", false, "help")
+
+	pflag.BoolVar(&Item.Issue, "issue", false, "Show Issue")
+	pflag.BoolVar(&Item.IssueComment, "comment", false, "Show Issue Comment (Exclude issues created by specified users)")
+	pflag.BoolVar(&Item.PullRequest, "pr", false, "Show Pull Request")
+	pflag.BoolVar(&Item.PullRequestReview, "review", false, "Show Pull Request review ((Exclude PR created by specified users))")
 
 	username := gh.GetLoginUser()
 	pflag.StringVarP(&User, "user", "u", username.Login, "specify github username")
