@@ -15,6 +15,13 @@ var (
 	writer    io.Writer
 )
 
+type (
+	info struct {
+		name  string
+		nodes []gh_ql.NodeInfo
+	}
+)
+
 func init() {
 	variable = gh_ql.QueryVariable{
 		Username: cli.User,
@@ -29,72 +36,57 @@ func fprintln(a ...interface{}) {
 	fmt.Fprintln(writer, a...)
 }
 
-func writeLines(infos []gh_ql.NodeInfo) {
-	for _, c := range infos {
-		fprintln(c.ToMarkdownList())
+func main() {
+	for _, a := range fetch() {
+
+		fprintln("## " + a.name)
+		for _, node := range a.nodes {
+			fprintln(node.ToMarkdownList())
+		}
 	}
 }
 
-func main() {
-	issueChan := make(chan []gh_ql.NodeInfo, 1)
-	issueCommentChan := make(chan []gh_ql.NodeInfo, 1)
-	prChan := make(chan []gh_ql.NodeInfo, 1)
-	prReviewChan := make(chan []gh_ql.NodeInfo, 1)
+func fetch() []info {
+	var results []info
+
 	wg := sync.WaitGroup{}
 
-	// defer で出力処理しているので、逆順で処理を記述する
-
-	if cli.Item.PullRequestReview || optionAny {
+	if cli.Item.Issue || optionAny {
 		wg.Add(1)
 		go func() {
-			prReviewChan <- gh_ql.ExcludeAuthor(gh_ql.GetPullRequestReview(variable), variable.Username)
+			results = append(
+				results,
+				info{name: "Issue", nodes: gh_ql.GetIssue(variable)},
+			)
 			wg.Done()
 		}()
-		defer func() {
-			fprintln("## Review")
-			writeLines(<-prReviewChan)
-		}()
-		defer close(prReviewChan)
-	}
-
-	if cli.Item.PullRequest || optionAny {
-		wg.Add(1)
-		go func() {
-			prChan <- gh_ql.GetPullRequest(variable)
-			wg.Done()
-		}()
-		defer func() {
-			fprintln("## PR")
-			writeLines(<-prChan)
-		}()
-		defer close(prChan)
 	}
 
 	if cli.Item.IssueComment || optionAny {
 		wg.Add(1)
 		go func() {
-			issueCommentChan <- gh_ql.ExcludeAuthor(gh_ql.GetIssueComment(variable), variable.Username)
+			results = append(results, info{name: "Issue Comment", nodes: gh_ql.ExcludeAuthor(gh_ql.GetIssueComment(variable), variable.Username)})
 			wg.Done()
 		}()
-		defer func() {
-			fprintln("## Issue Comment")
-			writeLines(<-issueCommentChan)
-		}()
-		defer close(issueCommentChan)
 	}
 
-	if cli.Item.Issue || optionAny {
+	if cli.Item.PullRequest || optionAny {
 		wg.Add(1)
 		go func() {
-			issueChan <- gh_ql.GetIssue(variable)
+			results = append(results, info{name: "PR", nodes: gh_ql.GetPullRequest(variable)})
 			wg.Done()
 		}()
-		defer func() {
-			fprintln("## Issue")
-			writeLines(<-issueChan)
+	}
+
+	if cli.Item.PullRequestReview || optionAny {
+		wg.Add(1)
+		go func() {
+			results = append(results, info{name: "Review", nodes: gh_ql.ExcludeAuthor(gh_ql.GetPullRequestReview(variable), variable.Username)})
+			wg.Done()
 		}()
-		defer close(issueChan)
 	}
 
 	wg.Wait()
+
+	return results
 }
